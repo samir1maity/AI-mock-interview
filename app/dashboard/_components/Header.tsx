@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 
 export default function Header() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="h-32 bg-white">
       <header className=" mx-auto flex justify-between items-center backdrop-blur-sm">
         <div className="flex items-center space-x-2 p-4">
           <div className="w-8 h-8 bg-blue-600 rounded-md"></div>
           <span className="text-xl font-bold">AI-mock-interview</span>
         </div>
         <nav className="hidden md:flex items-center space-x-6 p-4">
-          <Link href="/explore" className="text-gray-600 hover:text-gray-900">
+          <Link href="/dashboard" className="text-gray-600 hover:text-gray-900">
             Dashboard
           </Link>
           <Link href="/contact" className="text-gray-600 hover:text-gray-900">
