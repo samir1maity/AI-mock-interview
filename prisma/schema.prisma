@@ -11,18 +11,15 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-enum Role {
-  ADMIN
-  CANDIDATE
-  INTERVIEWER
+  // url = "postgresql://neondb_owner:i5jcK1XadEQY@ep-royal-cloud-a5ynruhs.us-east-2.aws.neon.tech/neondb?sslmode=require"
 }
 
 model User {
-  id         Int       @id @default(autoincrement())
-  email      String    @unique
-  name       String
-  role       Role      // admin, candidate, interviewer
-  createdAt  DateTime  @default(now())
+  id            String   @id @default(uuid())
+  name          String?
+  email         String   @unique
+  image         String?
+  emailVerified DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
