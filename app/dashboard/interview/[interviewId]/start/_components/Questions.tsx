@@ -1,4 +1,4 @@
-import { Lightbulb } from "lucide-react";
+import { Lightbulb, Volume2 } from "lucide-react";
 import React from "react";
 
 /**
@@ -57,6 +57,20 @@ const data: QuestionData[] = [
 
 console.log("data[0]", data[0]);
 
+const textToSpeach = (text: string) => {
+  // Check if the browser supports SpeechSynthesis
+  if ("speechSynthesis" in window) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    // Set optional properties such as language or pitch if needed
+    utterance.lang = "en-US";
+    utterance.pitch = 1;
+    utterance.rate = 1;
+    window.speechSynthesis.speak(utterance);
+  } else {
+    alert("Text-to-Speech is not supported in this browser.");
+  }
+};
+
 const Questions = ({ activeQuestion }: { activeQuestion: number }) => {
   return (
     data && (
@@ -73,11 +87,14 @@ const Questions = ({ activeQuestion }: { activeQuestion: number }) => {
               </p>
             ))}
         </div>
-        <h2 className="text-md my-4 md:text-lg">{data[activeQuestion].question}</h2>
+        <h2 className="text-md my-4 md:text-lg">
+          {data[activeQuestion].question}
+        </h2>
+        <Volume2 onClick={() => textToSpeach(data[activeQuestion].question)} />
         <div className="bg-yellow-300">
           <h2 className="flex gap-2 items-center">
-          <Lightbulb/>
-          <strong>note :</strong>
+            <Lightbulb />
+            <strong>note :</strong>
           </h2>
         </div>
       </div>
