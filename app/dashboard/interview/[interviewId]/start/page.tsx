@@ -11,7 +11,7 @@ const StartInterview: React.FC = () => {
       {/* Questions */}
       <Questions activeQuestion={activeQuestion} />
       {/* video / audio recordings */}
-      <RecordInterviewSection/>
+      <RecordInterviewSection activeQuestion={activeQuestion} />
     </div>
   );
 };

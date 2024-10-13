@@ -1,10 +1,6 @@
 import { Lightbulb, Volume2 } from "lucide-react";
 import React from "react";
 
-/**
- * using dummy data for UI and functionalities
- */
-
 type QuestionData = {
   category: string;
   difficulty: string;
@@ -55,23 +51,21 @@ const data: QuestionData[] = [
   },
 ];
 
-console.log("data[0]", data[0]);
-
-const textToSpeach = (text: string) => {
-  // Check if the browser supports SpeechSynthesis
-  if ("speechSynthesis" in window) {
-    const utterance = new SpeechSynthesisUtterance(text);
-    // Set optional properties such as language or pitch if needed
-    utterance.lang = "en-US";
-    utterance.pitch = 1;
-    utterance.rate = 1;
-    window.speechSynthesis.speak(utterance);
-  } else {
-    alert("Text-to-Speech is not supported in this browser.");
-  }
-};
-
 const Questions = ({ activeQuestion }: { activeQuestion: number }) => {
+  const textToSpeach = (text: string) => {
+    // Check if the browser supports SpeechSynthesis
+    if ("speechSynthesis" in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      // Set optional properties such as language or pitch if needed
+      utterance.lang = "en-US";
+      utterance.pitch = 1;
+      utterance.rate = 1;
+      window.speechSynthesis.speak(utterance);
+    } else {
+      alert("Text-to-Speech is not supported in this browser.");
+    }
+  };
+
   return (
     data && (
       <div className="">
