@@ -22,8 +22,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlusCircle, Clock, Calendar, BarChart, Play } from "lucide-react";
 import Link from "next/link";
 import Header from "./_components/Header";
+import AuthPages from "@/screens/AuthPages";
 
 export default function Dashboard() {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
+
   const previousInterviews = [
     {
       id: 1,
@@ -47,6 +50,8 @@ export default function Dashboard() {
       score: 78,
     },
   ];
+
+  if (!isLoggedIn) return <AuthPages />;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100">

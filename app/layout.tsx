@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { ReactNode } from "react"; // Import ReactNode for typing
 import { Toaster } from "@/components/ui/sonner";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -24,7 +25,6 @@ interface RootLayoutProps {
   children: ReactNode;
 }
 
-console.log("process", process.env);
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
@@ -32,7 +32,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ClerkProvider>{children}</ClerkProvider>
       </body>
       <Toaster />
     </html>
