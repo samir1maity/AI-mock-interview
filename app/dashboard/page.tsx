@@ -4,15 +4,14 @@
 
 // import Link from "next/link";
 import Header from "./_components/Header";
+
+
+export default function Dashboard() {
 import AiInterviewForm from "./_components/AiInterviewForm";
 import ListOfCompleteInterviews from "./_components/ListOfCompleteInterviews";
-import { useUser } from "@clerk/nextjs";
 import RecentActivity from "./_components/RecentActivity";
 import QuickStats from "./_components/QuickStats";
 
-export default function Dashboard() {
-  const { user } = useUser();
-  console.log("user", user);
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100'>

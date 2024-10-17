@@ -3,7 +3,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { ReactNode } from "react"; // Import ReactNode for typing
+import { ReactNode } from "react"; 
 import { Toaster } from "@/components/ui/sonner";
 import { ClerkProvider } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";

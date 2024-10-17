@@ -1,22 +1,40 @@
-/** @format */
+
 "use client";
-import { SignUp, useUser } from "@clerk/nextjs";
+import { SignUp, useSignUp } from "@clerk/nextjs";
 import { useEffect } from "react";
+import { useSession } from "@clerk/nextjs";
 
 export default function Page() {
-  const { user, isSignedIn, isLoaded } = useUser();
+  const { isLoaded, signUp } = useSignUp();
 
-  console.log("in signuppage");
+  console.log('first', useSession())
 
   useEffect(() => {
-    const storeUserInDB = async () => {
-      console.log("flow reached here and user data is ->", user);
-    };
+    console.log("flow reached here");
+    if (isLoaded && signUp?.status === "complete") {
+      // After Clerk signup is complete, send data to your API
+      const { firstName, lastName, emailAddress } = signUp;
 
-    if (isLoaded && isSignedIn) {
-      storeUserInDB();
+      console.log("firstName", firstName);
+
+      // fetch("/api/store-user", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     email: emailAddress,
+      //     firstName,
+      //     lastName,
+      //   }),
+      // })
+      //   .then((res) => res.json())
+      //   .then((data) => console.log("User stored:", data))
+      //   .catch((error) => console.error("Error storing user:", error));
     }
-  }, [user, isSignedIn, isLoaded]);
+  }, [isLoaded, signUp]);
+
+  console.log("isLoaded", isLoaded, "and", signUp);
 
   return <SignUp />;
 }
