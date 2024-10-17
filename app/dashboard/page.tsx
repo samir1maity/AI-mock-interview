@@ -23,9 +23,12 @@ import { PlusCircle, Clock, Calendar, BarChart, Play } from "lucide-react";
 import Link from "next/link";
 import Header from "./_components/Header";
 import AuthPages from "@/screens/AuthPages";
+import { useSession } from "@clerk/nextjs";
 
 export default function Dashboard() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
+
+  // console.log('useSession()', useSession())
 
   const previousInterviews = [
     {

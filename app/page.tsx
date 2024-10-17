@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Bot, BrainCircuit, Cpu } from "lucide-react";
 import Header from "./dashboard/_components/Header";
 import Link from "next/link";
-import { useSession } from "@clerk/nextjs";
+// import { useSession } from "@clerk/nextjs";
 
 export default function Home() {
 
-  console.log('useSession()', useSession())
+  // console.log('useSession()', useSession())
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100">
       <Header />
