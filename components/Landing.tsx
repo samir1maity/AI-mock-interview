@@ -1,12 +1,46 @@
 /** @format */
-
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { ArrowRight, Bot, BrainCircuit } from "lucide-react";
 import Link from "next/link";
 import Header from "@/app/dashboard/_components/Header";
+import { useSession } from "@clerk/nextjs";
+
+type PublicUserData = {
+  identifier?: string;
+};
 
 const Landing = () => {
+  const { session } = useSession();
+
+  const [message, setMessage] = useState<string>("");
+
+  const publicUserData: PublicUserData = session?.publicUserData || {};
+  const { identifier } = publicUserData;
+
+  useEffect(() => {
+    const handleCheckUser = async () => {
+      // console.log("flow reached here");
+      if (identifier) {
+        const response = await fetch("/api/store-user", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json", // Specify the content type as JSON
+          },
+          body: JSON.stringify({ identifier }),
+        });
+
+        if (response) {
+          setMessage("successful");
+          console.log("successfull", response);
+        }
+      }
+    };
+
+    handleCheckUser();
+  }, [identifier]);
+
   const features = [
     {
       name: "Realistic Scenarios",
