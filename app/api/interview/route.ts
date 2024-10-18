@@ -1,3 +1,5 @@
+/** @format */
+
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../lib/prisma";
 
@@ -5,7 +7,6 @@ export async function POST(req: NextRequest) {
   try {
     // Parse the incoming request body
     const { identifier } = await req.json();
-    console.log('first', identifier)
 
     // Validate the user input
     if (!identifier || typeof identifier !== "string") {
@@ -36,9 +37,14 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    console.log("interview", interview);
+
     // Return success response
     return NextResponse.json(
-      { msg: "Successfully created an interview", interview },
+      {
+        msg: "Successfully created an interview",
+        response: interview,
+      },
       { status: 201 }
     );
   } catch (error) {
