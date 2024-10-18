@@ -10,15 +10,35 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://neondb_owner:0WtTAEx5orCO@ep-proud-mode-a52v9gjw.us-east-2.aws.neon.tech/neondb?sslmode=require"
+  url      = "postgresql://neondb_owner:i5jcK1XadEQY@ep-royal-cloud-a5ynruhs.us-east-2.aws.neon.tech/neondb?sslmode=require"
 }
 
 model User {
-  id            String    @id @default(uuid())
+  id            String      @default(uuid())
   name          String?
-  email         String    @unique
+  email         String      @id @unique
   image         String?
   emailVerified DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  interviews    Interview[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Interview {
+  id        String     @id @default(cuid())
+  user      User       @relation(fields: [userEmail], references: [email]) // Relation using user email
+  userEmail String // Foreign key to User's email
+  date      DateTime   @default(now())
+  feedback  String?
+  questions Question[] // An interview has many questions
+}
+
+model Question {
+  id          String     @id @default(cuid())
+  text        String
+  answer      String
+  rating      String?
+  feedback    String?
+  interview   Interview  @relation(fields: [interviewId], references: [id])
+  interviewId String     // Foreign key to Interview
 }
