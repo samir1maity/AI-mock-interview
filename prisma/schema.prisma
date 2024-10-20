@@ -31,9 +31,9 @@ model Interview {
   date           DateTime   @default(now())
   feedback       String?
   questions      Question[] // An interview has many questions
-  jobRole        String
-  jobDescription String
-  yearOfExp      String
+  jobRole        String?
+  jobDescription String?
+  yearOfExp      String?
 }
 
 model Question {
@@ -45,4 +45,6 @@ model Question {
   interview    Interview @relation(fields: [interviewId], references: [id])
   interviewId  String // Foreign key to Interview
   createdAt    DateTime  @default(now())
+  difficulty   String?
+  concept      String?
 }

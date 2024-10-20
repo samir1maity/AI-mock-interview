@@ -2,22 +2,12 @@
 
 "use client";
 
-// import Image from "next/image";
 import Link from "next/link";
-// import { Button } from "@/components/ui/button";
-// import { useState } from "react";
 import { Cpu } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
-// import { useSession } from "@clerk/nextjs";
 
 export default function Header() {
-  // const [profilePopupEnabled, setProfilePopupEnabled] =
-  //   useState<boolean>(false);
-
-  // const userProfileBtn = UserButton();
-  // const session = useSession();
-
   const pathName = usePathname();
   console.log("pathName", pathName);
 
@@ -40,7 +30,7 @@ export default function Header() {
   ];
 
   return (
-    <header className='p-2 md:p-6 backdrop-blur-sm sticky top-0 z-50'>
+    <header className='p-4 md:p-6 backdrop-blur-sm sticky top-0 z-50'>
       <nav className='container mx-auto flex items-center justify-between'>
         <Link href='/' className='flex items-center space-x-2'>
           <Cpu className='h-8 w-8 text-indigo-600' />
@@ -59,17 +49,9 @@ export default function Header() {
           ))}
         </div>
 
-        {/* {session ? ( */}
         <>
           <UserButton />
         </>
-        {/* // ) : (
-        //   <>
-        //     <Button variant='outline' className='hidden md:inline-flex'>
-        //       Sign Up
-        //     </Button>
-        //   </>
-        // )} */}
       </nav>
     </header>
   );

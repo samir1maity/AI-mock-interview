@@ -22,7 +22,19 @@ type PublicUserData = {
   identifier?: string;
 };
 
-const AiInterviewForm: React.FC = () => {
+interface InterviewQuestions {
+  question: string;
+  difficulty: string;
+  concept: string;
+}
+
+interface AiInterviewFormProps {
+  setInterviewQuestions: (questions: InterviewQuestions[]) => void;
+}
+
+const AiInterviewForm: React.FC<AiInterviewFormProps> = ({
+  setInterviewQuestions,
+}) => {
   const [openForm, setOpenForm] = useState<boolean>(false);
   const [jobPosition, setJobPosition] = useState<string>("");
   const [jobDec, setJobDec] = useState<string>("");
@@ -37,7 +49,7 @@ const AiInterviewForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const fetchedData = await fetch("api/interview", {
+    const interviewData = await fetch("api/interview", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -45,12 +57,12 @@ const AiInterviewForm: React.FC = () => {
       body: JSON.stringify({ identifier }),
     });
 
-    if (!fetchedData.ok) {
+    if (!interviewData.ok) {
       return;
     }
 
-    const { response } = await fetchedData.json();
-
+    const { response } = await interviewData.json();
+    const interviewId = response.id;
     const inputPrompt: string = `Generate ${process.env.NEXT_PUBLIC_QUESTIONS_LIMIT} of interview questions for a ${jobPosition} with ${yearOfExp} of experience. The candidate should be proficient in ${jobDec}. Ensure the questions difficulty level should depends on experince level , focusing on practical and theoretical knowledge relevant to the role. The questions should be valid for an interview setting and cover various concepts within the tech stack to effectively evaluate the candidate’s skills.give data in json format`;
     try {
       const aiGeneratedData = await chatSession.sendMessage(inputPrompt);
@@ -58,7 +70,23 @@ const AiInterviewForm: React.FC = () => {
       const data = result.replace("```json", "").replace("```", "");
       const temp = JSON.parse(data);
       console.log("temp", temp);
-      router.push(`/dashboard/interview/${response.id}`);
+      setInterviewQuestions(temp);
+
+      const questionsData = await fetch("api/questions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          interviewId,
+          questions: temp,
+        }),
+      });
+
+      const { response } = await questionsData.json();
+      console.log("response", response);
+
+      router.push(`/dashboard/interview/${interviewId}`);
     } catch (error) {
       console.error("Error during chat session:", error);
     }

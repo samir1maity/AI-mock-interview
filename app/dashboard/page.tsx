@@ -8,8 +8,10 @@ import ListOfCompleteInterviews from "./_components/ListOfCompleteInterviews";
 import RecentActivity from "./_components/RecentActivity";
 import QuickStats from "./_components/QuickStats";
 import AiInterviewForm from "./_components/AiInterviewForm";
+import { useState } from "react";
 
 export default function Dashboard() {
+  const [interviewQuestions, setInterviewQuestions] = useState<string[]>([]);
   return (
     <div className='min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100'>
       <Header />
@@ -25,7 +27,7 @@ export default function Dashboard() {
 
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
           {/* New Interview Card */}
-          <AiInterviewForm />
+          <AiInterviewForm setInterviewQuestions={setInterviewQuestions} />
 
           {/* Previous Interviews */}
           <ListOfCompleteInterviews />
