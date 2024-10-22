@@ -2,8 +2,6 @@
 
 "use client";
 import React, { useEffect, useState } from "react";
-// import Questions from "./_components/Questions";
-// import RecordInterviewSection from "./_components/RecordInterviewSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -16,13 +14,13 @@ import {
   Maximize2,
 } from "lucide-react";
 import { useParams } from "next/navigation";
+import RecordInterviewSection from "./_components/RecordInterviewSection";
 
 interface Questions {
   question_txt: string;
 }
 
 const StartInterview: React.FC = () => {
-  // const [activeQuestion, setActiveQuestion] = useState<number>(0);
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -44,16 +42,8 @@ const StartInterview: React.FC = () => {
     fetchQuestions();
   }, []);
 
-  const questions = [
-    "Tell me about yourself.",
-    "What are your greatest strengths?",
-    "Where do you see yourself in 5 years?",
-    "Why should we hire you?",
-    "Do you have any questions for us?",
-  ];
-
   const handleNextQuestion = () => {
-    if (currentQuestion < questions.length) {
+    if (currentQuestion < allQuestions.length) {
       setCurrentQuestion(currentQuestion + 1);
     }
   };
@@ -68,13 +58,22 @@ const StartInterview: React.FC = () => {
     setIsFullscreen(!isFullscreen);
   };
 
+  const textToSpeach = (text: string) => {
+    // Check if the browser supports SpeechSynthesis
+    if ("speechSynthesis" in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      // Set optional properties such as language or pitch if needed
+      utterance.lang = "en-US";
+      utterance.pitch = 1;
+      utterance.rate = 1;
+      window.speechSynthesis.speak(utterance);
+    } else {
+      alert("Text-to-Speech is not supported in this browser.");
+    }
+  };
+
   return (
     <>
-      {/* // <div className="grid grid-cols-1 md:grid-cols-2"> */}
-      {/* <Questions activeQuestion={activeQuestion} />
-      
-      <RecordInterviewSection activeQuestion={activeQuestion} /> */}
-
       <div className='min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 p-4 sm:p-6 md:p-8'>
         <div className='max-w-7xl mx-auto'>
           <div className='grid gap-4 md:gap-6 md:grid-cols-2'>
@@ -147,10 +146,17 @@ const StartInterview: React.FC = () => {
                   <p className='text-sm text-gray-600 mb-3'>
                     {allQuestions[currentQuestion - 1]?.question_txt}
                   </p>
+                  <RecordInterviewSection
+                    allQuestions={allQuestions}
+                    currentQuestion={currentQuestion}
+                  />
                   <Button
                     variant='outline'
                     size='sm'
-                    className='text-indigo-600 border-indigo-600'>
+                    className='text-indigo-600 border-indigo-600'
+                    onClick={() =>
+                      textToSpeach(allQuestions[currentQuestion].question_txt)
+                    }>
                     <Mic className='w-3 h-3 mr-1' />
                     Listen
                   </Button>
@@ -181,7 +187,7 @@ const StartInterview: React.FC = () => {
                   </Button>
                   <Button
                     onClick={handleNextQuestion}
-                    disabled={currentQuestion === questions.length}
+                    disabled={currentQuestion === allQuestions.length}
                     className='bg-indigo-500 text-white hover:bg-indigo-600'
                     size='sm'>
                     Next
