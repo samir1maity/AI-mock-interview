@@ -5,10 +5,8 @@ import prisma from "../../../lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
-    // Parse the incoming request body
     const { identifier } = await req.json();
 
-    // Validate the user input
     if (!identifier || typeof identifier !== "string") {
       return NextResponse.json(
         { msg: "Invalid user email provided." },
@@ -16,7 +14,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if the user exists in the database
     const existingUser = await prisma.user.findUnique({
       where: { email: identifier },
     });
@@ -28,18 +25,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create a new interview
-    const interview = await prisma.interview.create({
+    const interview = await prisma.interviewSession.create({
       data: {
         userEmail: identifier,
-        date: new Date(),
-        feedback: null,
+        jobRole: "frontend",
+        jobDescription: "react, redux",
+        experienceYears: 1,
+        sessionStartedAt: new Date(),
       },
     });
 
-    console.log("interview", interview);
-
-    // Return success response
     return NextResponse.json(
       {
         msg: "Successfully created an interview",
@@ -49,7 +44,6 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     console.error("Error creating interview:", error);
-    // Generic error response
     return NextResponse.json(
       { msg: "Something went wrong.", error },
       { status: 500 }

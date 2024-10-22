@@ -1,54 +1,56 @@
 /** @format */
 
-import { NextRequest, NextResponse } from "next/server";
-import prisma from "../../../../lib/prisma"; // Adjust this path as necessary
+// /** @format */
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const interviewId = params.id;
+// import { NextRequest, NextResponse } from "next/server";
+// import prisma from "../../../../lib/prisma"; // Adjust this path as necessary
 
-  if (!interviewId) {
-    console.error("interviewId is required.");
-    throw new Error("interviewId is required.");
-  }
+// export async function GET(
+//   req: NextRequest,
+//   { params }: { params: { id: string } }
+// ) {
+//   const interviewId = params.id;
 
-  console.log("Fetching questions for interviewId:", interviewId);
+//   if (!interviewId) {
+//     console.error("interviewId is required.");
+//     throw new Error("interviewId is required.");
+//   }
 
-  try {
-    const interviewWithQuestions = await prisma.question.findMany({
-      where: {
-        interviewId: interviewId,
-      },
-    });
+//   console.log("Fetching questions for interviewId:", interviewId);
 
-    if (interviewWithQuestions.length === 0) {
-      console.log("No questions found for interviewId:", interviewId);
-      return NextResponse.json(
-        {
-          body: { error: "No questions found for this interview." },
-        },
-        { status: 404 }
-      );
-    }
+//   try {
+//     const interviewWithQuestions = await prisma.question.findMany({
+//       where: {
+//         interviewId: interviewId,
+//       },
+//     });
 
-    console.log("Retrieved questions:", interviewWithQuestions);
-    return NextResponse.json({
-      status: 200,
-      body: interviewWithQuestions,
-    });
-  } catch (error) {
-    console.error(
-      "Error fetching questions for interviewId:",
-      interviewId,
-      error
-    );
-    return NextResponse.json({
-      status: 500,
-      body: { error: "Internal server error while fetching questions." },
-    });
-  } finally {
-    await prisma.$disconnect();
-  }
-}
+//     if (interviewWithQuestions.length === 0) {
+//       console.log("No questions found for interviewId:", interviewId);
+//       return NextResponse.json(
+//         {
+//           body: { error: "No questions found for this interview." },
+//         },
+//         { status: 404 }
+//       );
+//     }
+
+//     console.log("Retrieved questions:", interviewWithQuestions);
+//     return NextResponse.json({
+//       status: 200,
+//       body: interviewWithQuestions,
+//     });
+//   } catch (error) {
+//     console.error(
+//       "Error fetching questions for interviewId:",
+//       interviewId,
+//       error
+//     );
+//     return NextResponse.json({
+//       status: 500,
+//       body: { error: "Internal server error while fetching questions." },
+//     });
+//   } finally {
+//     await prisma.$disconnect();
+//   }
+// }
