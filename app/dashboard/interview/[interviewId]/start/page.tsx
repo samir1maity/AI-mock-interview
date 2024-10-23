@@ -146,10 +146,10 @@ const StartInterview: React.FC = () => {
                   <p className='text-sm text-gray-600 mb-3'>
                     {allQuestions[currentQuestion - 1]?.question_txt}
                   </p>
-                  <RecordInterviewSection
+                  {/* <RecordInterviewSection
                     allQuestions={allQuestions}
                     currentQuestion={currentQuestion}
-                  />
+                  /> */}
                   <Button
                     variant='outline'
                     size='sm'
