@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const interview = prisma.interviewSession.findUnique({
+    const interview = await prisma.interviewSession.findUnique({
       where: {
         id: Number(interviewId),
         userEmail: identifier,
@@ -77,6 +77,8 @@ export async function GET(req: NextRequest) {
         messages: true,
       },
     });
+
+    console.log("interview", interview);
 
     if (!interview) {
       return NextResponse.json({

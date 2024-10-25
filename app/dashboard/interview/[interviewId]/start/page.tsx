@@ -14,7 +14,7 @@ import {
   Maximize2,
 } from "lucide-react";
 import { useParams } from "next/navigation";
-import RecordInterviewSection from "./_components/RecordInterviewSection";
+// import RecordInterviewSection from "./_components/RecordInterviewSection";
 
 interface Questions {
   question_txt: string;

@@ -27,6 +27,9 @@ const Chat: React.FC = () => {
   const publicUserData: PublicUserData = session?.publicUserData || {};
   const { identifier, firstName, lastName } = publicUserData;
 
+  /**
+   * Local States
+   */
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -35,6 +38,18 @@ const Chat: React.FC = () => {
     },
   ]);
   const [input, setInput] = useState("");
+  const [jobRole, setJobRole] = useState("frontend");
+  const [jobDescription, setJobDescription] = useState("react, redux");
+  const [yearOfExp, setYearOfExperience] = useState("1");
+  const [initialPrompt, setInitialPrompt] = useState(`
+You are conducting an AI interview for a candidate applying for the role of ${jobRole} with ${yearOfExp} years of experience. The job description includes ${jobDescription}, and the role involves working with technologies like.
+The interview is conversational, generating one question at a time and waiting for the candidate's response before proceeding.
+Start with a brief introduction, explaining the process.
+Ask questions tailored to the job role, focusing on technical skills, problem-solving, and relevant experience.
+Midway, inquire about specific projects the candidate has worked on, including the tech stack and methodologies used.
+After a set number of questions, summarize responses and provide feedback on strengths and areas for improvement.
+If the candidate's response is off-topic, provide a warning and guide them back to relevant discussion.
+Response format should be in JSON.`);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -42,45 +57,54 @@ const Chat: React.FC = () => {
 
   useEffect(scrollToBottom, [messages]);
 
-  const handleSend = () => {
+  useEffect(() => {
+    // fetchInterviewDetails();
+    handleChatStart();
+  }, []);
+
+  /**
+   * Handle send reponse
+   */
+
+  const handleSend = async () => {
     if (input.trim()) {
       const newMessage: Message = {
         id: messages.length + 1,
         text: input,
         sender: "user",
       };
-      setMessages([...messages, newMessage]);
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
       setInput("");
-      setTimeout(() => {
-        const aiReply: Message = {
-          id: messages.length + 2,
-          text: getAIReply(input),
-          sender: "ai",
-        };
-        setMessages((prev) => [...prev, aiReply]);
-      }, 1000);
+      try {
+        const result = await handleChatStart();
+        setTimeout(() => {
+          const aiReply: Message = {
+            id: messages.length + 2,
+            text: result,
+            sender: "ai",
+          };
+          setMessages((prev) => [...prev, aiReply]);
+        }, 1000);
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
-  const getAIReply = (userInput: string): string => {
-    // This is a mock AI response. In a real application, you'd integrate with an AI service.
-    const replies = [
-      "That's an interesting point. Can you elaborate on that?",
-      "How would you handle a situation where...?",
-      "What experience do you have with...?",
-      "Can you give me an example of a time when you...?",
-      "What do you think are the most important skills for this role?",
-    ];
-    return replies[Math.floor(Math.random() * replies.length)];
-  };
+  /**
+   *
+   */
 
   async function handleChatStart() {
     try {
-      const inputPrompt = `Generate ${process.env.NEXT_PUBLIC_QUESTIONS_LIMIT} of interview questions for a ${jobPosition} with ${yearOfExp} of experience. The candidate should be proficient in ${jobDec}. Ensure the questions difficulty level should depends on experince level , focusing on practical and theoretical knowledge relevant to the role. The questions should be valid for an interview setting and cover various concepts within the tech stack to effectively evaluate the candidate’s skills.give data in json format`;
+      const inputPrompt = initialPrompt;
+      console.log("inputPrompt", inputPrompt);
       const aiGeneratedData = await chatSession.sendMessage(inputPrompt);
       const result = aiGeneratedData.response.text();
+      console.log("result", result);
       const data = result.replace("```json", "").replace("```", "");
       const temp = JSON.parse(data);
+      console.log("temp", temp);
     } catch (error) {
       console.log("error at generating AI response", error);
     }
@@ -92,13 +116,9 @@ const Chat: React.FC = () => {
         `/api/interview/?identifier=${identifier}&interviewId=${interviewId}`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ identifier }),
         }
       );
-      const response = await interviewDetails;
+      const response = await interviewDetails.json();
       console.log("response", response);
     } catch (error) {
       console.log("error occurs in chatUI page", error);
