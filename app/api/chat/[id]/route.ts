@@ -8,10 +8,18 @@ export async function POST(
   { params }: { params: { id: number } }
 ) {
   try {
-    console.log("params.id", params.id);
-    const chatId = Number(params.id);
-    const { identifier } = await req.json();
-    console.log("ide", identifier);
+    const interviewId = Number(params.id);
+    const { identifier, content, isAi, isUser } = await req.json();
+
+    console.log("identifier", identifier);
+    console.log("content", content);
+    console.log("isAi", isAi);
+    console.log("isUser", isUser);
+    // console.log("id", id);
+
+    const isUserBoolean = isUser === "true";
+    const isAiBoolean = isAi === "true";
+
     if (typeof identifier !== "string") {
       return NextResponse.json(
         { msg: "invalid interview id" },
@@ -21,11 +29,12 @@ export async function POST(
 
     const message = await prisma.message.create({
       data: {
-        sessionId: chatId,
+        // id: id,
+        sessionId: interviewId,
         sender: identifier,
-        isUser: true,
-        content: "hello whats up bro!",
-        isAi: false,
+        isUser: isUserBoolean,
+        content: content,
+        isAi: isAiBoolean,
       },
     });
 

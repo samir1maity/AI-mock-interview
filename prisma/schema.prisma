@@ -25,22 +25,19 @@ model User {
 }
 
 model InterviewSession {
-  id        Int    @id @default(autoincrement())
-  user      User   @relation(fields: [userEmail], references: [email]) // Relation using user email
-  userEmail String // Foreign key to User's email
-
-  // Storing job-related data at the time of the interview
-  jobRole         String // The job role user is interviewing for during this session
-  jobDescription  String? // Job description for this session
-  experienceYears Int // Years of experience during this session
-
+  id               Int       @id @default(autoincrement())
+  user             User      @relation(fields: [userEmail], references: [email]) // Relation using user email
+  userEmail        String // Foreign key to User's email // Storing job-related data at the time of the interview
+  jobRole          String // The job role user is interviewing for during this session
+  jobDescription   String? // Job description for this session
+  experienceYears  Int // Years of experience during this session
   messages         Message[] // Relation to messages in the chat session
   sessionStartedAt DateTime  @default(now())
   sessionEndedAt   DateTime? // Optional, can be set when the interview ends
 }
 
 model Message {
-  id        Int              @id @default(autoincrement())
+  id        DateTime         @id @default(now())
   sessionId Int // Foreign key to InterviewSession
   session   InterviewSession @relation(fields: [sessionId], references: [id])
   sender    String // Can be 'user' or 'AI'

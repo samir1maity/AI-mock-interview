@@ -6,7 +6,7 @@ import { Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "next/navigation";
 import { useSession } from "@clerk/nextjs";
-import { chatSession } from "../utils/geminiAIModel";
+import { run } from "../utils/geminiAIModel";
 
 interface Message {
   id: number;
@@ -27,9 +27,6 @@ const Chat: React.FC = () => {
   const publicUserData: PublicUserData = session?.publicUserData || {};
   const { identifier, firstName, lastName } = publicUserData;
 
-  /**
-   * Local States
-   */
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -40,16 +37,12 @@ const Chat: React.FC = () => {
   const [input, setInput] = useState("");
   const [jobRole, setJobRole] = useState("frontend");
   const [jobDescription, setJobDescription] = useState("react, redux");
-  const [yearOfExp, setYearOfExperience] = useState("1");
-  const [initialPrompt, setInitialPrompt] = useState(`
-You are conducting an AI interview for a candidate applying for the role of ${jobRole} with ${yearOfExp} years of experience. The job description includes ${jobDescription}, and the role involves working with technologies like.
-The interview is conversational, generating one question at a time and waiting for the candidate's response before proceeding.
-Start with a brief introduction, explaining the process.
-Ask questions tailored to the job role, focusing on technical skills, problem-solving, and relevant experience.
-Midway, inquire about specific projects the candidate has worked on, including the tech stack and methodologies used.
-After a set number of questions, summarize responses and provide feedback on strengths and areas for improvement.
-If the candidate's response is off-topic, provide a warning and guide them back to relevant discussion.
-Response format should be in JSON.`);
+  const [yearOfExp, setYearOfExperience] = useState("0");
+  const [initialPrompt, setInitialPrompt] = useState(
+    `generate a question related to ${jobRole} and ${jobDescription} and this much ${yearOfExp}. when you generated 3 question give feedback from all history`
+  );
+  const [aiResponse, setAiResponse] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -58,56 +51,94 @@ Response format should be in JSON.`);
   useEffect(scrollToBottom, [messages]);
 
   useEffect(() => {
-    // fetchInterviewDetails();
-    handleChatStart();
+    const initiateChat = async () => {
+      setLoading(true);
+      try {
+        const aiData = await handleChatStart(initialPrompt);
+        const aiMessageId = Date.now();
+        const aiMessage: Message = {
+          id: aiMessageId,
+          text: aiData.question,
+          sender: "ai",
+        };
+        setMessages((prev) => [...prev, aiMessage]);
+      } catch (error) {
+        console.error("Error in initial AI message:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initiateChat();
   }, []);
 
-  /**
-   * Handle send reponse
-   */
-
   const handleSend = async () => {
-    if (input.trim()) {
-      const newMessage: Message = {
-        id: messages.length + 1,
-        text: input,
-        sender: "user",
-      };
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-      setInput("");
-      try {
-        const result = await handleChatStart();
-        setTimeout(() => {
-          const aiReply: Message = {
-            id: messages.length + 2,
-            text: result,
-            sender: "ai",
-          };
-          setMessages((prev) => [...prev, aiReply]);
-        }, 1000);
-      } catch (error) {
-        console.log(error);
-      }
+    if (!input.trim()) return;
+
+    // const messageId = Date.now();
+
+    // const userMessage: Message = {
+    //   id: messageId,
+    //   text: input,
+    //   sender: "user",
+    // };
+    // setMessages((prev) => [...prev, userMessage]);
+
+    setInput("");
+    setLoading(true);
+    const messageData = await fetch(`/api/chat/${interviewId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        // id: messageId,
+        content: input,
+        sender: identifier,
+        isAi: false,
+        isUser: true,
+      }),
+    });
+    const result = await messageData.json();
+    console.log("result", result);
+    try {
+      const aiData = await handleChatStart(input);
+      // const aiMessageId = Date.now();
+      console.log("it is after user send response", aiData);
+      // const aiMessage: Message = {
+      //   id: aiMessageId,
+      //   text: aiData.question,
+      //   sender: "ai",
+      // };
+      const res = await fetch(`/api/chat/${interviewId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          // id: messageId,
+          content: aiData.question,
+          sender: "ai",
+          isAi: true,
+          isUser: false,
+        }),
+      });
+      // setMessages((prev) => [...prev, aiMessage]);
+      const temp = await res.json();
+      console.log("temp", temp);
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  /**
-   *
-   */
-
-  async function handleChatStart() {
-    try {
-      const inputPrompt = initialPrompt;
-      console.log("inputPrompt", inputPrompt);
-      const aiGeneratedData = await chatSession.sendMessage(inputPrompt);
-      const result = aiGeneratedData.response.text();
-      console.log("result", result);
-      const data = result.replace("```json", "").replace("```", "");
-      const temp = JSON.parse(data);
-      console.log("temp", temp);
-    } catch (error) {
-      console.log("error at generating AI response", error);
-    }
+  async function handleChatStart(inputPrompt: string) {
+    console.log("inputPrompt", inputPrompt);
+    const newPrompt = `You are an AI interviewer. ${jobRole}, ${yearOfExp} years of experience. Here's the job description: ${jobDescription}\n\nConversation history:\n${messages
+      .map((msg) => `- ${msg.text}`)
+      .join("\n")}\n\n${inputPrompt}\n\nAsk the next question.`;
+    const result = await run(newPrompt);
+    const data = result.replace("```json", "").replace("```", "");
+    const temp = JSON.parse(data);
+    console.log("generated res", temp);
+    return temp;
   }
 
   async function fetchInterviewDetails() {
@@ -125,7 +156,7 @@ Response format should be in JSON.`);
     }
   }
 
-  useEffect(() => {}, []);
+  console.log("messages", messages);
 
   return (
     <div className='flex flex-col h-screen bg-indigo-500 text-white'>
