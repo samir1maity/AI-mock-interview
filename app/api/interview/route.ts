@@ -61,6 +61,8 @@ export async function GET(req: NextRequest) {
     const identifier = searchParams.get("identifier");
     const interviewId = searchParams.get("interviewId");
 
+    console.log("identifier", identifier, "interviewId", interviewId);
+
     if (!interviewId || !identifier) {
       return NextResponse.json(
         { msg: "Invalid user email or interview Id provided." },

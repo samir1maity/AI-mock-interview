@@ -20,12 +20,12 @@ export async function POST(
     const isUserBoolean = isUser === "true";
     const isAiBoolean = isAi === "true";
 
-    if (typeof identifier !== "string") {
-      return NextResponse.json(
-        { msg: "invalid interview id" },
-        { status: 400 }
-      );
-    }
+    // if (typeof identifier !== "string") {
+    //   return NextResponse.json(
+    //     { msg: "invalid interview id" },
+    //     { status: 400 }
+    //   );
+    // }
 
     const message = await prisma.message.create({
       data: {

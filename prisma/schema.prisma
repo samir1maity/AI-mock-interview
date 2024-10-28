@@ -37,7 +37,7 @@ model InterviewSession {
 }
 
 model Message {
-  id        DateTime         @id @default(now())
+  id        String           @id @default(uuid())
   sessionId Int // Foreign key to InterviewSession
   session   InterviewSession @relation(fields: [sessionId], references: [id])
   sender    String // Can be 'user' or 'AI'

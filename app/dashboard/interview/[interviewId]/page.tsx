@@ -3,12 +3,7 @@
 import ChatUI from "@/screens/ChatUI";
 
 const page = () => {
-  return (
-    <>
-      {" "}
-      <ChatUI />{" "}
-    </>
-  );
+  return <ChatUI />;
 };
 
 export default page;

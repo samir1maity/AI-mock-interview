@@ -1,6 +1,6 @@
 /** @format */
-
 "use client";
+
 import React, { useState, useRef, useEffect } from "react";
 import { Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,7 +10,7 @@ import { run } from "../utils/geminiAIModel";
 
 interface Message {
   id: number;
-  text: string;
+  content: string;
   sender: "user" | "ai";
 }
 
@@ -20,6 +20,21 @@ interface PublicUserData {
   lastName?: string | null;
 }
 
+const saveMessagesToLocalStorage = (messages: Message[]) => {
+  localStorage.setItem("currentChatSession", JSON.stringify(messages));
+};
+
+const loadMessagesFromLocalStorage = () => {
+  const savedMessages = localStorage.getItem("currentChatSession");
+  return savedMessages ? JSON.parse(savedMessages) : [];
+};
+
+/**
+ *
+ * user details need to save in localstorage
+ *
+ */
+
 const Chat: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { interviewId } = useParams();
@@ -27,136 +42,147 @@ const Chat: React.FC = () => {
   const publicUserData: PublicUserData = session?.publicUserData || {};
   const { identifier, firstName, lastName } = publicUserData;
 
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      text: `Hello ${firstName} ${lastName} ! I'm your AI interviewer. Let's begin the mock interview. What position are you applying for?`,
-      sender: "ai",
-    },
-  ]);
-  const [input, setInput] = useState("");
-  const [jobRole, setJobRole] = useState("frontend");
-  const [jobDescription, setJobDescription] = useState("react, redux");
-  const [yearOfExp, setYearOfExperience] = useState("0");
-  const [initialPrompt, setInitialPrompt] = useState(
-    `generate a question related to ${jobRole} and ${jobDescription} and this much ${yearOfExp}. when you generated 3 question give feedback from all history`
+  const [messages, setMessages] = useState<Message[]>(
+    loadMessagesFromLocalStorage() || [
+      {
+        id: 1,
+        content: `Hello ${firstName} ${lastName} ! I'm your AI interviewer. Let's begin the mock interview. What position are you applying for?`,
+        sender: "ai",
+      },
+    ]
   );
-  const [aiResponse, setAiResponse] = useState("");
+  const [input, setInput] = useState("");
+  const [jobRole, setJobRole] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
+  const [yearOfExp, setYearOfExperience] = useState("");
+  // const [initialPrompt, setInitialPrompt] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Helper to scroll to the latest message and save to local storage
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    saveMessagesToLocalStorage(messages);
   };
 
   useEffect(scrollToBottom, [messages]);
 
+  // Initialize interview details and set up initial prompt
   useEffect(() => {
-    const initiateChat = async () => {
-      setLoading(true);
+    const initializeChat = async () => {
       try {
-        const aiData = await handleChatStart(initialPrompt);
-        const aiMessageId = Date.now();
-        const aiMessage: Message = {
-          id: aiMessageId,
-          text: aiData.question,
-          sender: "ai",
-        };
-        setMessages((prev) => [...prev, aiMessage]);
+        await fetchInterviewDetails();
+        // setupInitialPrompt();
+        // initiateChat();
       } catch (error) {
-        console.error("Error in initial AI message:", error);
-      } finally {
-        setLoading(false);
+        console.error("Error initializing chat:", error);
       }
     };
-
-    initiateChat();
+    initializeChat();
   }, []);
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
-
-    // const messageId = Date.now();
-
-    // const userMessage: Message = {
-    //   id: messageId,
-    //   text: input,
-    //   sender: "user",
-    // };
-    // setMessages((prev) => [...prev, userMessage]);
-
-    setInput("");
-    setLoading(true);
-    const messageData = await fetch(`/api/chat/${interviewId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        // id: messageId,
-        content: input,
-        sender: identifier,
-        isAi: false,
-        isUser: true,
-      }),
-    });
-    const result = await messageData.json();
-    console.log("result", result);
+  const fetchInterviewDetails = async () => {
     try {
-      const aiData = await handleChatStart(input);
-      // const aiMessageId = Date.now();
-      console.log("it is after user send response", aiData);
-      // const aiMessage: Message = {
-      //   id: aiMessageId,
-      //   text: aiData.question,
-      //   sender: "ai",
-      // };
-      const res = await fetch(`/api/chat/${interviewId}`, {
+      const response = await fetch(
+        `/api/interview/?identifier=${identifier}&interviewId=${interviewId}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch interview details");
+      const data = await response.json();
+      console.log("data", data);
+      setJobRole(data.jobRole || "");
+      setJobDescription(data.jobDescription || "");
+      setYearOfExperience(data.yearOfExp || "");
+    } catch (error) {
+      console.error("Error fetching interview details:", error);
+    }
+  };
+
+  // const setupInitialPrompt = () => {
+  //   setInitialPrompt(
+  //     `generate a question related to ${jobRole} and ${jobDescription} and ${yearOfExp} years of experience. Generate 3 questions, then give feedback on all responses.`
+  //   );
+  // };
+
+  // const initiateChat = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const aiData = await generateAiResponse(initialPrompt);
+  //     await sendAiMessage(aiData.question);
+  //   } catch (error) {
+  //     console.error("Error in initial AI message:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const generateAiResponse = async (inputPrompt: string) => {
+    const formattedPrompt = `You are an AI interviewer for ${jobRole} with ${yearOfExp} years of experience. Job description: ${jobDescription}.\n\nConversation history:\n${messages
+      .map((msg) => `- ${msg.content}`)
+      .join("\n")}\n\n${inputPrompt}\n\nAsk the next question.`;
+    try {
+      const result = await run(formattedPrompt);
+      const data = result.replace("```json", "").replace("```", "");
+      return JSON.parse(data);
+    } catch (error) {
+      console.error("Error generating AI response:", error);
+      throw error;
+    }
+  };
+
+  const sendAiMessage = async (content: string) => {
+    try {
+      const response = await fetch(`/api/chat/${interviewId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          // id: messageId,
-          content: aiData.question,
-          sender: "ai",
+          content,
+          identifier: "ai",
           isAi: true,
           isUser: false,
         }),
       });
-      // setMessages((prev) => [...prev, aiMessage]);
-      const temp = await res.json();
-      console.log("temp", temp);
+      const data = await response.json();
+      console.log("data", data);
+      setMessages((prev) => [...prev, data.response]);
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error sending AI message:", error);
+    }
+  };
+
+  const handleSend = async () => {
+    if (!input.trim()) return;
+    setInput("");
+    setLoading(true);
+
+    try {
+      // Send user message
+      const userMessage = await fetch(`/api/chat/${interviewId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: input,
+          identifier: "user",
+          isAi: false,
+          isUser: true,
+        }),
+      });
+      const userResponse = await userMessage.json();
+      console.log("userResponse", userResponse);
+      setMessages((prev) => [...prev, userResponse.response]);
+
+      // Generate and send AI response
+      const aiData = await generateAiResponse(input);
+      await sendAiMessage(aiData.question);
+    } catch (error) {
+      console.error("Error in handleSend:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  async function handleChatStart(inputPrompt: string) {
-    console.log("inputPrompt", inputPrompt);
-    const newPrompt = `You are an AI interviewer. ${jobRole}, ${yearOfExp} years of experience. Here's the job description: ${jobDescription}\n\nConversation history:\n${messages
-      .map((msg) => `- ${msg.text}`)
-      .join("\n")}\n\n${inputPrompt}\n\nAsk the next question.`;
-    const result = await run(newPrompt);
-    const data = result.replace("```json", "").replace("```", "");
-    const temp = JSON.parse(data);
-    console.log("generated res", temp);
-    return temp;
-  }
-
-  async function fetchInterviewDetails() {
-    try {
-      const interviewDetails = await fetch(
-        `/api/interview/?identifier=${identifier}&interviewId=${interviewId}`,
-        {
-          method: "GET",
-        }
-      );
-      const response = await interviewDetails.json();
-      console.log("response", response);
-    } catch (error) {
-      console.log("error occurs in chatUI page", error);
-    }
-  }
-
-  console.log("messages", messages);
+  const handleEndChatSession = () => {
+    localStorage.removeItem("currentChatSession");
+    setMessages([]);
+  };
 
   return (
     <div className='flex flex-col h-screen bg-indigo-500 text-white'>
@@ -179,7 +205,7 @@ const Chat: React.FC = () => {
                 className={`max-w-[80%] p-3 rounded-lg ${
                   message.sender === "user" ? "bg-indigo-400" : "bg-indigo-600"
                 }`}>
-                {message.text}
+                {message.content}
               </div>
             </motion.div>
           ))}
@@ -203,6 +229,7 @@ const Chat: React.FC = () => {
             aria-label='Send message'>
             <Send size={20} />
           </button>
+          <button onClick={handleEndChatSession}>End Interview</button>
         </div>
       </div>
     </div>
