@@ -15,14 +15,6 @@ type PublicUserData = {
   identifier?: string;
 };
 
-// interface User{
-
-// }
-
-// const saveMessagesToLocalStorage = () => {
-//   localStorage.setItem("user", JSON.stringify());
-// };
-
 export default function Dashboard() {
   const { session } = useSession();
 
