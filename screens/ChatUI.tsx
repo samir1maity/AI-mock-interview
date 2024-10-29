@@ -54,7 +54,7 @@ const Chat: React.FC = () => {
   const [jobDescription, setJobDescription] = useState("");
   const [yearOfExp, setYearOfExperience] = useState("");
   const [loading, setLoading] = useState(false);
-  const [feedBack, setFeedBack] = useState('')
+  const [feedBack, setFeedBack] = useState("");
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -74,7 +74,7 @@ const Chat: React.FC = () => {
         console.log("data", data);
         setJobRole(data.response.jobRole);
         setJobDescription(data.response.jobDescription);
-        setYearOfExperience(data.response.yearOfExp);
+        setYearOfExperience(data.response.experienceYears);
       } catch (error) {
         console.error("Error fetching interview details:", error);
       }
@@ -87,11 +87,9 @@ const Chat: React.FC = () => {
 
   const generateAiResponse = async (inputPrompt: string) => {
     console.log("inputPrompt", inputPrompt);
-    const formattedPrompt = `You are an AI interviewer for ${jobRole} with ${yearOfExp} years of experience. Job description: ${jobDescription}.\n\nConversation history:\n${messages
+    const formattedPrompt = `You are an AI interviewer for ${jobRole} with ${yearOfExp} years of experience. Job description: ${jobDescription}.\n\nask most ralevent interview questions.\n\nConversation history:\n${messages
       .map((msg) => `- ${msg.content}`)
-      .join(
-        "\n"
-      )}\n\n${inputPrompt}\n\ngive response in json format\n\n${feedBack}`;
+      .join("\n")}\n\n${inputPrompt}\n\ngive response in json format`;
     try {
       console.log("formattedPrompt", formattedPrompt);
       const result = await run(formattedPrompt);
@@ -161,11 +159,11 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-indigo-500 text-white">
-      <header className="bg-indigo-600 p-4 text-center">
-        <h1 className="text-2xl font-bold">AI Mock Interview</h1>
+    <div className='flex flex-col h-screen bg-indigo-500 text-white'>
+      <header className='bg-indigo-600 p-4 text-center'>
+        <h1 className='text-2xl font-bold'>AI Mock Interview</h1>
       </header>
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className='flex-1 overflow-y-auto p-4 space-y-4'>
         <AnimatePresence>
           {messages.map((message) => (
             <motion.div
@@ -175,14 +173,12 @@ const Chat: React.FC = () => {
               exit={{ opacity: 0, y: -50 }}
               transition={{ duration: 0.3 }}
               className={`flex ${
-                message.sender === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
+                message?.sender === "user" ? "justify-end" : "justify-start"
+              }`}>
               <div
                 className={`max-w-[80%] p-3 rounded-lg ${
-                  message.sender === "user" ? "bg-indigo-400" : "bg-indigo-600"
-                }`}
-              >
+                  message?.sender === "user" ? "bg-indigo-400" : "bg-indigo-600"
+                }`}>
                 {message.content}
               </div>
             </motion.div>
@@ -190,22 +186,21 @@ const Chat: React.FC = () => {
         </AnimatePresence>
         <div ref={messagesEndRef} />
       </div>
-      <div className="p-4 bg-indigo-600">
-        <div className="flex space-x-2">
+      <div className='p-4 bg-indigo-600'>
+        <div className='flex space-x-2'>
           <input
-            type="text"
+            type='text'
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Type your answer..."
-            className="flex-1 bg-indigo-500 text-white placeholder-indigo-300 border border-indigo-400 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-            aria-label="Type your answer"
+            placeholder='Type your answer...'
+            className='flex-1 bg-indigo-500 text-white placeholder-indigo-300 border border-indigo-400 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white'
+            aria-label='Type your answer'
           />
           <button
             onClick={handleSend}
-            className="bg-white text-indigo-500 rounded-full p-2 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-white"
-            aria-label="Send message"
-          >
+            className='bg-white text-indigo-500 rounded-full p-2 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-white'
+            aria-label='Send message'>
             <Send size={20} />
           </button>
           <button onClick={handleEndChatSession}>End Interview</button>

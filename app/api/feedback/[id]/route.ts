@@ -1,3 +1,5 @@
+/** @format */
+
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -9,6 +11,8 @@ export async function POST(
     const { identifier, feedback, rating } = await req.json();
     const { id } = params;
 
+    console.log("id ", id, "identifier", identifier);
+
     if (!identifier || typeof identifier !== "string") {
       return NextResponse.json(
         { msg: "Something went wrong with your email address." },
@@ -17,7 +21,7 @@ export async function POST(
     }
     const interviewSession = await prisma.interviewSession.findFirst({
       where: {
-        id: id,
+        id: Number(id),
         userEmail: identifier,
       },
     });
@@ -35,7 +39,7 @@ export async function POST(
       },
       data: {
         feedback: feedback,
-        rating: rating,
+        rating: Number(rating),
       },
     });
 
