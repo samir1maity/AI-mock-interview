@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://neondb_owner:0WtTAEx5orCO@ep-proud-mode-a52v9gjw.us-east-2.aws.neon.tech/neondb?sslmode=require"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -34,6 +34,8 @@ model InterviewSession {
   messages         Message[] // Relation to messages in the chat session
   sessionStartedAt DateTime  @default(now())
   sessionEndedAt   DateTime? // Optional, can be set when the interview ends
+  feedback         String?
+  rating           Int?
 }
 
 model Message {

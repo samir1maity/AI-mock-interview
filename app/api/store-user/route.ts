@@ -7,20 +7,21 @@ export async function POST(req: NextRequest) {
   // const identifier = req.nextUrl.searchParams.get("identifier");
   const data = await req.json();
   const { identifier } = data;
+  console.log("identifier", identifier);
 
-  if (!identifier) {
-    return NextResponse.json(
-      { msg: "Identifier is required" },
-      { status: 400 }
-    );
-  }
+  // if (typeof identifier !== "string") {
+  //   return NextResponse.json(
+  //     { msg: "Identifier is required" },
+  //     { status: 400 }
+  //   );
+  // }
 
   const existingUser = await prisma.user.findUnique({
     where: { email: identifier },
   });
 
   if (existingUser) {
-    return NextResponse.json({ msg: "User already exists" }, { status: 400 });
+    return NextResponse.json({ msg: "User already exists", data: existingUser}, { status: 400 });
   }
 
   try {
